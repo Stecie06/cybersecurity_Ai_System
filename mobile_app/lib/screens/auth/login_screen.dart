@@ -5,6 +5,8 @@ import '../dashboard_screen.dart';
 import '../auth/register_screen.dart';
 
 class LoginScreen extends StatefulWidget {
+  const LoginScreen({super.key});
+
   @override
   _LoginScreenState createState() => _LoginScreenState();
 }
@@ -15,7 +17,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
   bool _rememberMe = false;
-  bool _showPassword = false; // For password visibility toggle
+  bool _showPassword = false;
   final AuthService _authService = AuthService();
 
   @override
@@ -40,7 +42,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
     setState(() => _isLoading = true);
     try {
-      final user = await _authService.loginWithEmailPassword(
+      final user = await _authService.signInWithEmailAndPassword(
         _emailController.text.trim(),
         _passwordController.text.trim(),
         rememberMe: _rememberMe,
@@ -49,7 +51,7 @@ class _LoginScreenState extends State<LoginScreen> {
       if (user != null) {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (_) => DashboardScreen()),
+          MaterialPageRoute(builder: (_) => const DashboardScreen()),
         );
       }
     } catch (e) {
@@ -68,7 +70,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> _resetPassword() async {
     if (_emailController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Please enter your email first')),
+        const SnackBar(content: Text('Please enter your email first')),
       );
       return;
     }
@@ -76,7 +78,7 @@ class _LoginScreenState extends State<LoginScreen> {
     try {
       await _authService.sendPasswordResetEmail(_emailController.text.trim());
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Password reset email sent!')),
+        const SnackBar(content: Text('Password reset email sent!')),
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -88,18 +90,17 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Login')),
+      appBar: AppBar(title: const Text('Login')),
       body: SingleChildScrollView(
         child: Padding(
-          padding: EdgeInsets.all(20),
+          padding: const EdgeInsets.all(20),
           child: Form(
             key: _formKey,
             child: Column(
               children: [
-                // Email Field
                 TextFormField(
                   controller: _emailController,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     labelText: 'Email',
                     prefixIcon: Icon(Icons.email),
                     border: OutlineInputBorder(),
@@ -108,33 +109,28 @@ class _LoginScreenState extends State<LoginScreen> {
                   validator: (value) => 
                       value!.isEmpty ? 'Please enter email' : null,
                 ),
-                SizedBox(height: 20),
-
-                // Password Field with Visibility Toggle
+                const SizedBox(height: 20),
                 TextFormField(
                   controller: _passwordController,
                   decoration: InputDecoration(
                     labelText: 'Password',
-                    prefixIcon: Icon(Icons.lock),
+                    prefixIcon: const Icon(Icons.lock),
                     suffixIcon: IconButton(
                       icon: Icon(
                         _showPassword ? Icons.visibility : Icons.visibility_off,
                       ),
                       onPressed: () => setState(() => _showPassword = !_showPassword),
                     ),
-                    border: OutlineInputBorder(),
+                    border: const OutlineInputBorder(),
                   ),
                   obscureText: !_showPassword,
                   validator: (value) => 
                       value!.isEmpty ? 'Please enter password' : null,
                 ),
-                SizedBox(height: 10),
-
-                // Remember Me & Forgot Password Row
+                const SizedBox(height: 10),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    // Remember Me Checkbox
                     Row(
                       children: [
                         Checkbox(
@@ -142,42 +138,36 @@ class _LoginScreenState extends State<LoginScreen> {
                           onChanged: (value) => 
                               setState(() => _rememberMe = value!),
                         ),
-                        Text('Remember Me'),
+                        const Text('Remember Me'),
                       ],
                     ),
-
-                    // Forgot Password
                     TextButton(
                       onPressed: _resetPassword,
-                      child: Text('Forgot Password?'),
+                      child: const Text('Forgot Password?'),
                     ),
                   ],
                 ),
-                SizedBox(height: 20),
-
-                // Login Button
+                const SizedBox(height: 20),
                 _isLoading
-                    ? CircularProgressIndicator()
+                    ? const CircularProgressIndicator()
                     : ElevatedButton(
                         onPressed: _login,
-                        child: Text('LOGIN', style: TextStyle(fontSize: 18)),
+                        child: const Text('LOGIN', style: TextStyle(fontSize: 18)),
                         style: ElevatedButton.styleFrom(
-                          minimumSize: Size(double.infinity, 50),
+                          minimumSize: const Size(double.infinity, 50),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
                           ),
                         ),
                       ),
-                SizedBox(height: 15),
-
-                // Register Link
+                const SizedBox(height: 15),
                 TextButton(
                   onPressed: () => Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (_) => RegisterScreen()),
+                    MaterialPageRoute(builder: (_) => const RegisterScreen()),
                   ),
                   child: RichText(
-                    text: TextSpan(
+                    text: const TextSpan(
                       text: 'Don\'t have an account? ',
                       style: TextStyle(color: Colors.black),
                       children: [

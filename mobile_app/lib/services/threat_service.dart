@@ -1,31 +1,58 @@
-import 'dart:convert';
-import 'package:http/http.dart' as http;
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import '../models/threat_report.dart';
 
 class ThreatService {
-  final String _apiUrl = "http://YOUR_API_IP:8000"; // Replace with your API URL
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  Future<String?> _getUserToken() async {
-    return await FirebaseAuth.instance.currentUser?.getIdToken();
+  Stream<List<ThreatReport>> get threatsStream {
+    return _firestore
+        .collection('threats')
+        .orderBy('timestamp', descending: true)
+        .snapshots()
+        .map((snapshot) => snapshot.docs
+            .map((doc) => ThreatReport.fromJson(doc.data()))
+            .toList());
   }
 
-  Future<List<dynamic>> getCriticalAlerts() async {
-    final token = await _getUserToken();
-    final response = await http.get(
-      Uri.parse('$_apiUrl/alerts'),
-      headers: {'Authorization': 'Bearer $token'},
-    );
-    return json.decode(response.body);
+  Future<List<ThreatReport>> getAllThreats() async {
+    try {
+      final snapshot = await _firestore
+          .collection('threats')
+          .orderBy('timestamp', descending: true)
+          .get();
+      return snapshot.docs.map((doc) => ThreatReport.fromJson(doc.data())).toList();
+    } catch (e) {
+      throw Exception('Failed to load threats: $e');
+    }
   }
 
-  Future<List<dynamic>> getAllThreats() async {
-    final token = await _getUserToken();
-    final response = await http.get(
-      Uri.parse('$_apiUrl/threat-reports'),
-      headers: {'Authorization': 'Bearer $token'},
-    );
-    return json.decode(response.body);
+  Future<List<ThreatReport>> getCriticalAlerts() async {
+    final snapshot = await _firestore
+        .collection('threats')
+        .where('severity', isEqualTo: 'CRITICAL')
+        .orderBy('timestamp', descending: true)
+        .get();
+    return snapshot.docs.map((doc) => ThreatReport.fromJson(doc.data())).toList();
   }
 
-  getCriticalThreats() {}
+  Stream<List<ThreatReport>> getCriticalAlertsStream() {
+    return _firestore
+        .collection('threats')
+        .where('severity', isEqualTo: 'CRITICAL')
+        .orderBy('timestamp', descending: true)
+        .snapshots()
+        .map((snapshot) => snapshot.docs
+            .map((doc) => ThreatReport.fromJson(doc.data()))
+            .toList());
+  }
+
+  Future<void> refreshThreats() async {
+    await _firestore.collection('threats').get();
+  }
+
+  Future<void> addThreat(ThreatReport threat) async {
+    await _firestore.collection('threats').add(threat.toJson());
+  }
 }
